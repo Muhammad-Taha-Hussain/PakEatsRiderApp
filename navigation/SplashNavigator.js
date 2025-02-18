@@ -34,11 +34,6 @@ const SplashNavigator = () => {
         component={SplashScreen}
         options={{ headerShown: false }}
       />
-      {/* <Stack.Screen
-        name="CartScreen"
-        component={Cart}
-        options={{ headerShown: false }}
-      /> */}
       <Stack.Screen
         name="AppMain"
         component={AuthenticationNavigator}

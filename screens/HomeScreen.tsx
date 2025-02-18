@@ -1,18 +1,21 @@
 import React, { useCallback, useRef, useMemo, useState } from "react";
 
-  import { View, Text, Button, ActivityIndicator, StyleSheet } from "react-native";
-  import { GestureHandlerRootView } from "react-native-gesture-handler";
-  import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
-  import MapView from "react-native-maps";
-  import useCurrentLocation from "../hooks/useCurrentLocation";
-
-
+import {
+  View,
+  Text,
+  Button,
+  ActivityIndicator,
+  StyleSheet,
+} from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import MapView from "react-native-maps";
+import useCurrentLocation from "../hooks/useCurrentLocation";
 
 const App = () => {
+  const { location, errorMsg } = useCurrentLocation();
+  const [selectedRestaurant, setSelectedRestaurant] = useState(null);
 
-	const { location, errorMsg } = useCurrentLocation();  
-	const [selectedRestaurant, setSelectedRestaurant] = useState(null);
-	
   // hooks
   const sheetRef = useRef<BottomSheet>(null);
 
@@ -31,36 +34,36 @@ const App = () => {
   }, []);
 
   if (!location && !errorMsg) {
-	return (
-	  <View className="flex-1 justify-center items-center">
-		<Text className="text-lg font-medium text-gray-700">
-		  Fetching location...
-		</Text>
-		<ActivityIndicator size="large" color="#0000ff" />
-	  </View>
-	);
+    return (
+      <View className="flex-1 justify-center items-center">
+        <Text className="text-lg font-medium text-gray-700">
+          Fetching location...
+        </Text>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
   }
 
   if (errorMsg) {
-	return (
-	  <View className="flex-1 justify-center items-center">
-		<Text className="text-lg font-medium text-red-500">{errorMsg}</Text>
-	  </View>
-	);
+    return (
+      <View className="flex-1 justify-center items-center">
+        <Text className="text-lg font-medium text-red-500">{errorMsg}</Text>
+      </View>
+    );
   }
 
   // render
   return (
     <GestureHandlerRootView>
-	  <MapView
-		  initialRegion={{
-			latitude: location.latitude,
-			longitude: location.longitude,
-			latitudeDelta: 0.05,
-			longitudeDelta: 0.05,
-		  }}
-		/>
-<Text>he</Text>
+      <MapView
+        initialRegion={{
+          latitude: location.latitude,
+          longitude: location.longitude,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        }}
+      />
+      <Text>he</Text>
       <BottomSheet
         ref={sheetRef}
         snapPoints={snapPoints}
@@ -74,7 +77,6 @@ const App = () => {
     </GestureHandlerRootView>
   );
 };
-
 
 export default App;
 

@@ -313,9 +313,10 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   // Logout Function
   const logout = async () => {
     await supabase.auth.signOut();
+    console.log('profile', profile);
+    
     setUser(null);
     setProfile(null);
-    router.replace("/(auth)");
   };
 
   const forgotPassword = async (email) => {

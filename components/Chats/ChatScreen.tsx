@@ -11,7 +11,9 @@ import { ArrowLeftIcon, PaperAirplaneIcon } from "react-native-heroicons/outline
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ChatScreen({ route, navigation }) {
-  const { name, avatar } = route.params;
+  // const { name, avatar } = route.params;
+  const name = 'Taha Hussain';
+  const avatar = 'https://randomuser.me/api/port';
 
   const [messages, setMessages] = useState([
     { id: 1, text: "Just to order", sender: "other", time: "09:00" },

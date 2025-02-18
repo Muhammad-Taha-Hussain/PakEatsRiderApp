@@ -21,6 +21,7 @@ import { RegistrationProvider } from "../providers/RegistrationContext";
 
 //import providers
 import { useAuth } from "../providers/AuthProviders";
+import DrawerNavigator from "./DrawerNavigator";
 
 const Stack = createStackNavigator();
 
@@ -30,10 +31,7 @@ const AuthenticationNavigator = () => {
   return (
     <RegistrationProvider>
       <Stack.Navigator
-        {...(profile
-          ? (initialRouteName = "Drawer")
-          : (initialRouteName = "Login"))}
-        // initialRouteName="Login"
+      initialRouteName="Login"
         screenOptions={{
           gestureEnabled: true,
           gestureDirection: "horizontal",
@@ -53,6 +51,11 @@ const AuthenticationNavigator = () => {
           },
         }}
       >
+        {/* {profile ? (
+          <Stack.Screen name="Drawer" component={AppNavigator} />
+        ) : (
+          <Stack.Screen name="Auth" component={AuthenticationNavigator} />
+        )} */}
         <Stack.Screen
           name="Login"
           component={LoginScreen}
@@ -102,7 +105,7 @@ const AuthenticationNavigator = () => {
         />
         <Stack.Screen
           name="Drawer"
-          component={AppNavigator}
+          component={DrawerNavigator}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

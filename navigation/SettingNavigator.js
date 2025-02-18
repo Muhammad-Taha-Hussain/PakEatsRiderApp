@@ -7,17 +7,16 @@ import AuthenticationNavigator from "./AuthenticationNavigator";
 import ProfileSettingsScreen from "../screens/Settings copy/index";
 import ChatListScreen from "../screens/Chats/ChatListScreen";
 
-
 //settings imports
 import Setting from "../screens/Settings copy/index";
 import AppSetting from "../screens/Settings copy/AppSettingScreen";
-import SettingNavigator from "./SettingNavigator";
+
 
 const Stack = createStackNavigator();
 
-const AppNavigator = () => {
+const SettingNavigator = () => {
   return (
-    <Stack.Navigator initialRouteName="DrawerNavigator">
+    <Stack.Navigator initialRouteName="Setting">
     {/* Embed Drawer Navigator */}
     <Stack.Screen
       name="DrawerNavigator"
@@ -25,18 +24,13 @@ const AppNavigator = () => {
       options={{ headerShown: false }}
     />
     {/* Stack Screen */}
-    <Stack.Screen name="ChatListScreen" component={ChatListScreen} />
-    <Stack.Screen name="ChatScreen" component={ChatScreen} />
-    {/* <Stack.Screen name="ChatListScreen" component={ChatListScreen} /> */}
-    {/* <Stack.Screen name="SettingScreen" component={ProfileSettingsScreen} /> */}
-
-    {/* Setting Screens */}
-    <Stack.Screen name="Setting" component={SettingNavigator} options={{ headerShown: false }} />
+    <Stack.Screen name="Setting" component={Setting} options={{headerShown: false}}  />
     <Stack.Screen name="AppSetting" component={AppSetting} options={{headerShown: false}}  />
-
+    {/* <Stack.Screen name="ChatListScreen" component={ChatListScreen} /> */}
+    <Stack.Screen name="SettingScreen" component={ProfileSettingsScreen} />
     <Stack.Screen name="Auth" component={AuthenticationNavigator} options={{headerShown: false}} />
   </Stack.Navigator>
   );
 };
 
-export default AppNavigator;
+export default SettingNavigator;
