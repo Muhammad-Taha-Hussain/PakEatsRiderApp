@@ -8,10 +8,13 @@ type RemoteImageProps = {
 } & Omit<ComponentProps<typeof Image>, 'source'>;
 
 const RemoteImage = ({ path, fallback, ...imageProps }: RemoteImageProps) => {
-  const [image, setImage] = useState('');
+  const [image, setImage] = useState<string>('');
 
   useEffect(() => {
-    if (!path) return;
+    if (!path || typeof path !== 'string') {
+      console.warn("Invalid path for image:", path); // Debugging log
+      return;
+    }
     (async () => {
       setImage('');
       const { data, error } = await supabase.storage

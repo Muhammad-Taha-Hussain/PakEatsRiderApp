@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 
 import { TouchableOpacity } from "react-native";
@@ -28,28 +28,45 @@ const Stack = createStackNavigator();
 const AuthenticationNavigator = () => {
   const navigation = useNavigation();
   const { profile } = useAuth();
+
+  const [prevScreen, setPrevScreen] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("state", (e) => {
+      const currentScreen = e.data.state.routes[e.data.state.index].name;
+      setPrevScreen(currentScreen);
+    });
+    return unsubscribe;
+  }, [navigation]);
+
   return (
     <RegistrationProvider>
       <Stack.Navigator
       initialRouteName="Login"
-        screenOptions={{
-          gestureEnabled: true,
-          gestureDirection: "horizontal",
-          cardStyleInterpolator: ({ current, layouts }) => {
-            return {
-              cardStyle: {
-                transform: [
-                  {
-                    translateX: current.progress.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [layouts?.screen?.width || 0, 0],
-                    }),
-                  },
-                ],
-              },
-            };
-          },
-        }}
+      screenOptions={({ route }) => ({
+        gestureEnabled: true,
+        gestureDirection: "horizontal",
+        cardStyleInterpolator: ({ current, next, layouts }) => {
+          const isForward =
+          (prevScreen === "Login" && route.name === "Signup") ||
+          (prevScreen === "RegisterV1" && route.name === "RegisterV2") ||
+          (prevScreen === "RegisterV2" && route.name === "RegisterV3");
+          return {
+            cardStyle: {
+              transform: [
+                {
+                  translateX: current.progress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: isForward
+                      ? [layouts.screen.width, 0] // Login → Signup (Right to Left)
+                      : [-layouts.screen.width, 0], // Signup → Login (Left to Right)
+                  }),
+                },
+              ],
+            },
+          };
+        },
+      })}
       >
         {/* {profile ? (
           <Stack.Screen name="Drawer" component={AppNavigator} />

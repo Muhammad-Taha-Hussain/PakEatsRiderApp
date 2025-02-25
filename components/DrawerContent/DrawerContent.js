@@ -26,13 +26,17 @@ const DrawerContent = (props) => {
     await logout(); // Perform logout operation
 
     console.log("Logging out...");
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "Login" }], // This should match the name of the AuthenticationNavigator's screen
+    });
 
     // Reset navigation to AuthenticationNavigator
     // navigation.navigate("AuthenticationNavigator");
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "AuthStack" }], // Navigate to Auth stack properly
-    });
+    // navigation.reset({
+    //   index: 0,
+    //   routes: [{ name: "AuthStack" }], // Navigate to Auth stack properly
+    // });
   };
 
   return (

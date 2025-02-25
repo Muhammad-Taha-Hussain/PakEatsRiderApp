@@ -109,7 +109,7 @@ const LoginScreen = ({ navigation }) => {
         {/* Dont have an account */}
         <View className="flex-row justify-center mt-6">
           <Text className="text-sm text-gray-500">Don’t have an account? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
+          <TouchableOpacity onPress={() => navigation.replace("Signup")}>
             <Text className="text-sm text-green-600 font-bold">Register</Text>
           </TouchableOpacity>
         </View>

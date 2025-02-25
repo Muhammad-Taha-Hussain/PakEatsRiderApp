@@ -297,13 +297,18 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         password,
       });
 
+      const { data, error: errorData } = await supabase.from("riders").select("*").eq("riderid", authData?.user?.id);
+      console.log("data", data);
       if (error) throw error;
-
+      if (errorData) throw errorData;
       // const currentUser = authData?.user;
       // if (currentUser) {
       //   await ensureUserInCustomersTable(currentUser, userName);
       // }
-      setProfile(authData)
+      
+      setProfile(data[0]);
+      console.log("profile", profile);
+      
     } catch (error) {
       console.error("Login Error:", error.message);
       throw error;

@@ -1,15 +1,21 @@
 import React from "react";
 import { View, Text, Image } from "react-native";
+import RemoteImage from "../RemoteImages/RemoteImage";
 
 const ProfileHeader = ({ name, email, imageUrl }) => {
   return (
     <View className="items-center mt-8 mb-4">
       <View className="relative">
-        <Image
+        <RemoteImage
+          path={imageUrl}
+          fallback={"../../assets/profile.png"}
+          className="w-36 h-36 rounded-full"
+        />
+        {/* <Image
           source={{ uri: imageUrl }}
           className="w-20 h-20 rounded-full"
           alt="Profile Image"
-        />
+        /> */}
         <View className="absolute bottom-0 right-0 bg-yellow-400 w-6 h-6 rounded-full flex items-center justify-center">
           <Text className="text-white text-xs font-bold">🔒</Text>
         </View>

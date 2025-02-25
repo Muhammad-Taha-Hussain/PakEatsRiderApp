@@ -9,16 +9,16 @@ import { supabase } from '../../lib/supabase';
 // }
 
 
-export const updateCustomerDetail = () => {
+export const updateRiderDetail = () => {
     const queryClient = useQueryClient();
   
     return useMutation({
       mutationFn: async (data: any) => {
-        const { error, data: updatedCustomer } = await supabase
+        const { error, data: updatedRider } = await supabase
           .from('riders')
           .update({
             name: data.fullName,
-            image: data.image,
+            profile_image: data.image,
           })
           .eq('riderid', data.id)
           .select()
@@ -28,9 +28,9 @@ export const updateCustomerDetail = () => {
           throw new Error(error.message);
         }
 
-          console.log("Updated Customer kahan hai",updatedCustomer);
+          console.log("Updated Customer kahan hai",updatedRider);
         
-        return updatedCustomer;
+        return updatedRider;
       },
     //   async onSuccess(_, { id }) {
     //     await queryClient.invalidateQueries(['products']);

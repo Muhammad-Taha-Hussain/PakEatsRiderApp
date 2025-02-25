@@ -1,14 +1,16 @@
 import React, {useState} from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
-import { defaultPizzaImage } from "../HomeComponent/DealListItem";
+// import { defaultPizzaImage } from "../HomeComponent/DealListItem";
 import RemoteImage from "../RemoteImages/RemoteImage";
-import FullScreenImageViewer from "../FullScreenImageViewer";
+import FullScreenImageViewer from "./FullScreenImageViewer";
+import { profileImage } from "../../screens/Settings copy";
 
 
 const ProfileHeader = ({ name, email, imageUrl }) => {
   const [isImageViewerVisible, setImageViewerVisible] = useState(false);
 
   // console.log(imageUrl);
+  const stringImage = imageUrl.toString();
   
   return (
     <View className="items-center mt-8 mb-4">
@@ -16,8 +18,8 @@ const ProfileHeader = ({ name, email, imageUrl }) => {
       <TouchableOpacity onPress={() => setImageViewerVisible(true)}>
       <RemoteImage
         path={imageUrl}
-        fallback={defaultPizzaImage}
-        className="w-36 h-36 rounded-full"
+        fallback={'profileImage'}
+        className="w-20 h-20 rounded-full"
         />
         </TouchableOpacity>
         {/* <Image
@@ -35,7 +37,7 @@ const ProfileHeader = ({ name, email, imageUrl }) => {
       {/* Full-Screen Image Viewer */}
       <FullScreenImageViewer
         visible={isImageViewerVisible}
-        imageUrl={imageUrl}
+        imageUrl={stringImage}
         onClose={() => setImageViewerVisible(false)}
       />
     </View>

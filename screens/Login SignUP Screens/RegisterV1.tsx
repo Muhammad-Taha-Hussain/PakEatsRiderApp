@@ -147,7 +147,7 @@ const RegisterScreen = ({ navigation }) => {
             // setPassword("");
             // setPhoneNo("");
             // setRiderName("");
-            navigation.goBack();
+            navigation.replace('Login');
           }}
         >
           <Text className="text-sm text-green-600 font-bold">Sign In</Text>
