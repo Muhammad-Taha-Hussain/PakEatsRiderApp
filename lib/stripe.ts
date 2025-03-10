@@ -18,14 +18,20 @@ const fetchPaymentSheetParams = async (amount: number) => {
 };
 
 export const initializePaymentSheet = async (amount: number) => {
-  console.log('Initializing payment sheet, for: ', amount);
+  console.log("Initializing payment sheet for amount:", amount);
 
-  const { paymentIntent, publishableKey } =
-    await fetchPaymentSheetParams(amount);
+  const { paymentIntent, publishableKey } = await fetchPaymentSheetParams(amount);
+  // console.log(paymentIntent);
+  // console.log(publishableKey);
+  
 
-  if (!paymentIntent || !publishableKey) return;
-
-  const result = await initPaymentSheet({
+  console.log("Fetched params:", paymentIntent, publishableKey); // Debugging log
+//|| !publishableKey
+  if (!paymentIntent ) {
+    console.error("Missing paymentIntent or publishableKey");
+    return;
+  }
+  const { error} = await initPaymentSheet({
     merchantDisplayName: 'Taha Hussain',
     paymentIntentClientSecret: paymentIntent,
     // customerId: customer,
@@ -34,15 +40,28 @@ export const initializePaymentSheet = async (amount: number) => {
       name: 'Default Name',
     },
   });
-  console.log(result);
+
+  if (error) {
+    console.error("initPaymentSheet Error:", error);
+    Alert.alert("Error initializing payment sheet", error.message);
+  } else {
+    console.log("Payment sheet initialized successfully!");
+  }
+
+  // console.log(result);
 };
 
 export const openPaymentSheet = async () => {
+  console.log("Opening payment sheet...");
+
   const { error } = await presentPaymentSheet();
 
   if (error) {
-    Alert.alert(error.message);
+    console.error("presentPaymentSheet Error:", error);
+    Alert.alert("Payment failed", error.message);
     return false;
   }
+
+  console.log("Payment successful!");
   return true;
 };

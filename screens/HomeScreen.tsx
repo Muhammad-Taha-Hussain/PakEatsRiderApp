@@ -1022,6 +1022,7 @@ import React, {
   import SecondModal from "../components/HomeComponents/SecondModal";
   import MapView, { Marker } from "react-native-maps";
   import { NativeViewGestureHandler } from 'react-native-gesture-handler';
+import { initializePaymentSheet, openPaymentSheet } from "../lib/stripe";
 
   
   const CustomHandle = () => (
@@ -1114,8 +1115,26 @@ import React, {
       price: "180 PKR",
     });
   
-    const acceptOrder = (order) => {
-      console.log("Order Accepted:", order);
+    const acceptOrder = async (selectedOrder) => {
+      try {
+        console.log('This order selceted', selectedOrder);
+        
+        await initializePaymentSheet(Math.floor(selectedOrder.totalamount * 100));
+        console.log("Payment sheet initialized, now opening...");
+        const payed = await openPaymentSheet();
+        if (!payed) {
+          console.error("Payment was not completed.");
+          return;
+        }
+        console.log(
+          "Payment successful! Proceeding with order creation...",
+          selectedOrder.totalamount
+        );
+      // console.log("Order Accepted:", order);
+        // router.push("/Orders");
+      } catch (error) {
+        console.error("Error during checkout:", error);
+      }
       // Handle order acceptance logic (e.g., update status in Supabase)
     };
   
@@ -1350,17 +1369,6 @@ import React, {
                 goBackToFirstModal={openFirstModal}
                 acceptOrder={acceptOrder}
               />
-            {/* </SafeAreaView> */}
-            {/* <BottomSheetView style={styles.contentContainer}>
-              Back Arrow Button
-              <TouchableOpacity
-                style={styles.backButton}
-                onPress={goBackToFirstModal}
-              >
-                <AntDesign name="arrowleft" size={24} color="black" />
-              </TouchableOpacity>
-              <Text style={styles.text}>Second Modal 🚀</Text>
-            </BottomSheetView> */}
           </BottomSheetModal>
         </BottomSheetModalProvider>
       </GestureHandlerRootView>

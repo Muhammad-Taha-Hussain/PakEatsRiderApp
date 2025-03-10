@@ -3,7 +3,7 @@ import { View, Text, Image, TouchableOpacity } from "react-native";
 // import { defaultPizzaImage } from "../HomeComponent/DealListItem";
 import RemoteImage from "../RemoteImages/RemoteImage";
 import FullScreenImageViewer from "./FullScreenImageViewer";
-import { profileImage } from "../../screens/Settings copy";
+import { profileImage } from "../../screens/Settings";
 
 
 const ProfileHeader = ({ name, email, imageUrl }) => {

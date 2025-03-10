@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal, View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import RemoteImage from '../RemoteImages/RemoteImage';
-import { profileImage } from '../../screens/Settings copy';
+import { profileImage } from '../../screens/Settings';
 // import { defaultPizzaImage } from './HomeComponent/DealListItem';
 
 const FullScreenImageViewer = ({ visible, imageUrl, onClose }) => {

@@ -1,5 +1,5 @@
 import { createStackNavigator } from "@react-navigation/stack";
-import PaymentDetailsScreen from "../screens/Settings copy/PaymentDetailsScreen";
+import PaymentDetailsScreen from "../screens/Settings/PaymentDetailsScreen";
 
 const PaymentStack = createStackNavigator();
 

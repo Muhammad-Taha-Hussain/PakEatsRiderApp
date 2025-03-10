@@ -6,7 +6,7 @@ import DrawerContent from "../components/DrawerContent/DrawerContent";
 import ChatListScreen from "../screens/Chats/ChatListScreen";
 import ChatScreen from "../components/Chats/ChatScreen";
 import AuthenticationNavigator from "./AuthenticationNavigator";
-import ProfileSettingsScreen from "../screens/Settings copy/index";
+import ProfileSettingsScreen from "../screens/Settings/index";
 import SettingNavigator from "./SettingNavigator";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { OrderProvider } from "../context/OrderContext";
