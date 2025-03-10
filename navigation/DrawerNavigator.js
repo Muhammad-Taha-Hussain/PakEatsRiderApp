@@ -9,6 +9,7 @@ import AuthenticationNavigator from "./AuthenticationNavigator";
 import ProfileSettingsScreen from "../screens/Settings copy/index";
 import SettingNavigator from "./SettingNavigator";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { OrderProvider } from "../context/OrderContext";
 
 const Drawer = createDrawerNavigator();
 
@@ -35,15 +36,15 @@ const DrawerNavigator = () => {
       }}
       drawerContent={(props) => <DrawerContent {...props} />}
     >
-      <Drawer.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{
-          drawerIcon: ({ color }) => (
-            <Ionicons name="home-outline" size={24} color={color} />
-          ),
-        }}
-      />
+        <Drawer.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{
+            drawerIcon: ({ color }) => (
+              <Ionicons name="home-outline" size={24} color={color} />
+            ),
+          }}
+        />
 
       {/* <Drawer.Screen name="Settings" component={LoginField} />
       <Drawer.Screen name="ChatListScreen" component={ChatListScreen} /> */}

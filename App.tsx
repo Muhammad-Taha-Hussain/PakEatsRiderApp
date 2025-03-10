@@ -10,6 +10,8 @@ import "./global.css";
 import SplashNavigator from "./navigation/SplashNavigator.js";
 import { AuthProvider } from "./providers/AuthProviders";
 import QueryProvider from "./providers/QueryProvider";
+import { OrderProvider } from "./context/OrderContext";
+import { LocationProvider } from "./providers/LocationProvider";
 
 export default function App() {
   return (
@@ -17,7 +19,11 @@ export default function App() {
       <NavigationContainer>
         <AuthProvider>
           <QueryProvider>
+            <OrderProvider>
+              {/* <LocationProvider> */}
             <SplashNavigator />
+              {/* </LocationProvider> */}
+            </OrderProvider>
           </QueryProvider>
         </AuthProvider>
       </NavigationContainer>

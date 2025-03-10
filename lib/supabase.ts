@@ -61,7 +61,7 @@ const supabaseUrl = 'https://sbdzcpcznysxcmjaumoa.supabase.co';
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNiZHpjcGN6bnlzeGNtamF1bW9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI2ODUxODgsImV4cCI6MjA0ODI2MTE4OH0.ifLVHlBcrw_0ly2djAYJG4Hxq0ZmTbhNgHWXwKcHsp0';
 // process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
 
-console.log("supabaseUrl", process.env.EXPO_PUBLIC_SUPABASE_URL, "supabase anon", process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY);
+console.log("supabaseUrl", process.env.SUPABASE_URL, "supabase anon", process.env.SUPABASE_ANON_KEY);
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
