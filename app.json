@@ -20,11 +20,19 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.tahahussaindev.RiderApp"
     },
     "web": {
       "bundler": "metro",
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "supabaseUrl": "https://sbdzcpcznysxcmjaumoa.supabase.co",
+      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNiZHpjcGN6bnlzeGNtamF1bW9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI2ODUxODgsImV4cCI6MjA0ODI2MTE4OH0.ifLVHlBcrw_0ly2djAYJG4Hxq0ZmTbhNgHWXwKcHsp0",
+      "eas": {
+        "projectId": "9360ab1f-fba1-40c0-9a1d-c15b59ffdd49"
+      }
     }
   }
 }

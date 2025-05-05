@@ -987,205 +987,307 @@
 //   );
 // }
 
-
-
 import React, {
-    useCallback,
-    useRef,
-    useEffect,
-    useState,
-    useMemo,
-  } from "react";
-  import {
-    View,
-    Text,
-    StyleSheet,
-    Button,
-    TouchableOpacity,
-    BackHandler,
-    ActivityIndicator,
-    Pressable,
-    Dimensions,
-  } from "react-native";
-  import { GestureHandlerRootView } from "react-native-gesture-handler";
-  import {
-    BottomSheetModal,
-    BottomSheetView,
-    BottomSheetModalProvider,
-    BottomSheetTextInput,
-    BottomSheetScrollView,
-    BottomSheetFlatList,
-  } from "@gorhom/bottom-sheet";
-  import { AntDesign, Ionicons } from "@expo/vector-icons";
-  import useCurrentLocation from "../hooks/useCurrentLocation";
-  import { SafeAreaView } from "react-native-safe-area-context";
-  import SecondModal from "../components/HomeComponents/SecondModal";
-  import MapView, { Marker } from "react-native-maps";
-  import { NativeViewGestureHandler } from 'react-native-gesture-handler';
+  useCallback,
+  useRef,
+  useEffect,
+  useState,
+  useMemo,
+} from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Button,
+  TouchableOpacity,
+  BackHandler,
+  ActivityIndicator,
+  Pressable,
+  Dimensions,
+} from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import {
+  BottomSheetModal,
+  BottomSheetView,
+  BottomSheetModalProvider,
+  BottomSheetTextInput,
+  BottomSheetScrollView,
+  BottomSheetFlatList,
+} from "@gorhom/bottom-sheet";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
+import useCurrentLocation from "../hooks/useCurrentLocation";
+import { SafeAreaView } from "react-native-safe-area-context";
+import SecondModal from "../components/HomeComponents/SecondModal";
+import MapView, { Marker } from "react-native-maps";
+import { NativeViewGestureHandler } from "react-native-gesture-handler";
 import { initializePaymentSheet, openPaymentSheet } from "../lib/stripe";
+import { useAuth } from "../providers/AuthProviders";
+import {
+  acceptOrderCurrent,
+  acceptConfirmArrival,
+  acceptOrderCompleted,
+} from "../api/active-orders/acceptOrder";
 
+const CustomHandle = () => (
+  <View style={styles1.handleContainer}>
+    <View style={styles1.handleIndicator} />
+  </View>
+);
+
+const styles1 = StyleSheet.create({
+  handleContainer: {
+    alignItems: "center",
+    paddingVertical: 20, // Increased padding for taller handle
+    backgroundColor: "#f0f0f0",
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+  },
+  handleIndicator: {
+    width: 40,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#ccc",
+  },
+});
+
+const App = () => {
+  const { profile } = useAuth();
+  const { orders, location, mapRef, errorMsg, riderHasOrder, riderOrder } =
+    useCurrentLocation();
+  const [destination, setDestination] = useState("");
+  const snapPoints = useMemo(() => ["25%", "5%", "50%", "90%"], []);
+  const [outerScrollEnabled, setOuterScrollEnabled] = useState(true);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectedOrderSummary, setSelectedOrderSummary] = useState(null);
+  const [isOrderAccepted, setIsOrderAccepted] = useState(false);
+  const [hasArrived, setHasArrived] = useState(false);
+  const [contentHeight, setContentHeight] = useState(0);
+  console.log("location is", location);
+
+  console.log("Proifle are", profile?.riderid);
+
+  console.log("Seleceted Order", selectedOrder);
+
+  console.log("Rider has order or not", riderHasOrder);
+
+  console.log("Rider order is", riderOrder);
+
+  console.log("Is order accepted", isOrderAccepted);
+
+  console.log("Has arrived", hasArrived);
   
-  const CustomHandle = () => (
-    <View style={styles1.handleContainer}>
-      <View style={styles1.handleIndicator} />
-    </View>
-  );
-  
-  const styles1 = StyleSheet.create({
-    handleContainer: {
-      alignItems: "center",
-      paddingVertical: 20, // Increased padding for taller handle
-      backgroundColor: "#f0f0f0",
-      borderTopLeftRadius: 10,
-      borderTopRightRadius: 10,
-    },
-    handleIndicator: {
-      width: 40,
-      height: 6,
-      borderRadius: 3,
-      backgroundColor: "#ccc",
-    },
-  });
-  
-  const App = () => {
-    const { orders, location, mapRef, errorMsg } = useCurrentLocation();
-    const [destination, setDestination] = useState("");
-    const snapPoints = useMemo(() => ["25%", "5%", "50%", "90%"], []);
-    const [outerScrollEnabled, setOuterScrollEnabled] = useState(true);
-    const [selectedOrder, setSelectedOrder] = useState(null);
-    const [contentHeight, setContentHeight] = useState(0);
-    console.log("location is", location);
-  
-    // Refs for modals
-    const firstModalRef = useRef<BottomSheetModal>(null);
-    const secondModalRef = useRef<BottomSheetModal>(null);
-  
-    const handleOpen = useCallback((index: number) => {
-      // sheetRef.current?.snapToIndex(index);
-      // sheetRef.current?.expand();
-      firstModalRef.current?.snapToIndex(index);
-    }, []);
-    const handleClosePress = useCallback(() => {
-      firstModalRef.current?.dismiss();
-    }, []);
-  
-    // Open first modal
-    const openFirstModal = useCallback(() => {
-      setSelectedOrder(null);
-      firstModalRef.current?.present();
-    }, []);
-  
-    // Open second modal and close first modal (push effect)
-    const openSecondModal = useCallback((order) => {
-      setSelectedOrder(order);
-      firstModalRef.current?.dismiss();
-      secondModalRef.current?.present();
-    }, []);
-  
-    // Handle going back to first modal
-    const goBackToFirstModal = useCallback(() => {
-      secondModalRef.current?.dismiss();
-      firstModalRef.current?.present();
-    }, []);
-  
-    // Handle Android hardware back button
-    useEffect(() => {
-      const backAction = () => {
-        if (secondModalRef.current) {
-          goBackToFirstModal();
-          return true; // Prevent app from closing
-        }
-        return false; // Allow default back behavior
-      };
-  
-      const backHandler = BackHandler.addEventListener(
-        "hardwareBackPress",
-        backAction
-      );
-  
-      return () => backHandler.remove();
-    }, [goBackToFirstModal]);
-  
-    // Sample Table Data
-    const data = Array(20).fill({
-      name: "Karachi Chicken Biryani",
-      distRest: "2.5 km",
-      userDist: "4.0 km",
-      time: "15 mins",
-      price: "180 PKR",
-    });
-  
-    const acceptOrder = async (selectedOrder) => {
-      try {
-        console.log('This order selceted', selectedOrder);
-        
-        await initializePaymentSheet(Math.floor(selectedOrder.totalamount * 100));
-        console.log("Payment sheet initialized, now opening...");
-        const payed = await openPaymentSheet();
-        if (!payed) {
-          console.error("Payment was not completed.");
-          return;
-        }
-        console.log(
-          "Payment successful! Proceeding with order creation...",
-          selectedOrder.totalamount
-        );
-      // console.log("Order Accepted:", order);
-        // router.push("/Orders");
-      } catch (error) {
-        console.error("Error during checkout:", error);
+
+  // Refs for modals
+  const firstModalRef = useRef<BottomSheetModal>(null);
+  const secondModalRef = useRef<BottomSheetModal>(null);
+
+  const handleAcceptOrder = useCallback(() => {
+    // sheetRef.current?.snapToIndex(index);
+    // sheetRef.current?.expand();
+    setIsOrderAccepted(true);
+    secondModalRef.current?.dismiss();
+  }, []);
+  const handleClosePress = useCallback(() => {
+    firstModalRef.current?.dismiss();
+  }, []);
+
+  // Function to handle arrival at the restaurant
+  const reachDestination = () => {
+    alert("You have reached the restaurant!");
+    try {
+      if (riderHasOrder) {
+        const data = acceptConfirmArrival(riderOrder.orderid);
+      } else {
+        const data = acceptConfirmArrival(selectedOrder.orderid);
       }
-      // Handle order acceptance logic (e.g., update status in Supabase)
+      if (!data) {
+        console.error("Order acceptance failed.");
+        return;
+      }
+      setHasArrived(true);
+    } catch (error) {
+      console.error("Error during checkout:", error);
+    }
+  };
+
+  const orderCompleted = () => {
+    alert("You have reached the user destination!");
+    try {
+
+      if(riderHasOrder) {
+        const data = acceptOrderCompleted(
+          selectedOrder.orderid,
+          riderOrder?.riderpaymentid
+        );
+      } else {
+
+        console.log("Selected Order ID Summary:", selectedOrderSummary._j[0]?.riderpaymentid);
+        
+        const data = acceptOrderCompleted(
+          selectedOrder.orderid,
+          selectedOrderSummary._j[0]?.riderpaymentid
+        );
+      }
+      if (!data) {
+        console.error("Order acceptance failed.");
+        return;
+      }
+      setHasArrived(false);
+      setIsOrderAccepted(false);
+      firstModalRef.current?.present();
+    } catch (error) {
+      console.error("Error during checkout:", error);
+    }
+  };
+
+  // Function to handle cancel action
+  const cancelOrder = () => {
+    setIsOrderAccepted(false);
+    setHasArrived(false);
+    // firstModalRef.current?.snapToIndex(0);
+    firstModalRef.current?.present();
+  };
+
+  // Open first modal
+  const openFirstModal = useCallback(() => {
+    setSelectedOrder(null);
+    firstModalRef.current?.present();
+  }, []);
+
+  // Open second modal and close first modal (push effect)
+  const openSecondModal = useCallback((order) => {
+    setSelectedOrder(order);
+    firstModalRef.current?.dismiss();
+    secondModalRef.current?.present();
+  }, []);
+
+  // Handle going back to first modal
+  const goBackToFirstModal = useCallback(() => {
+    secondModalRef.current?.dismiss();
+    firstModalRef.current?.present();
+  }, []);
+
+  // Handle Android hardware back button
+  useEffect(() => {
+    const backAction = () => {
+      if (secondModalRef.current) {
+        goBackToFirstModal();
+        return true; // Prevent app from closing
+      }
+      return false; // Allow default back behavior
     };
-  
-    if (!location && !errorMsg) {
-      return (
-        <View className="flex-1 justify-center items-center">
-          <Text className="text-lg font-medium text-gray-700">
-            Fetching location...
-          </Text>
-          <ActivityIndicator size="large" color="#0000ff" />
-        </View>
-      );
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, [goBackToFirstModal]);
+
+  // Sample Table Data
+  const data = Array(20).fill({
+    name: "Karachi Chicken Biryani",
+    distRest: "2.5 km",
+    userDist: "4.0 km",
+    time: "15 mins",
+    price: "180 PKR",
+  });
+
+  console.log(selectedOrder);
+
+  const acceptOrder = async (selectedOrder) => {
+    try {
+      // console.log('This order selceted', selectedOrder);
+
+      // await initializePaymentSheet(Math.floor(selectedOrder.totalamount * 100));
+      // console.log("Payment sheet initialized, now opening...");
+      // const payed = await openPaymentSheet();
+      // if (!payed) {
+      //   console.error("Payment was not completed.");
+      //   return;
+      // }
+      // console.log(
+      //   "Payment successful! Proceeding with order creation...",
+      //   selectedOrder.totalamount
+      // );
+      // console.log("Order Accepted:", order);
+      // router.push("/Orders");
+
+      // const order = acceptOrderCurrent(orders[0].orderid, profile?.riderid);
+      // console.log("Selected Order ID:", selectedOrder.orderid);
+
+      const orderSummary = acceptOrderCurrent(selectedOrder.orderid, profile?.riderid);
+
+      if (!orderSummary) {
+        console.error("Order acceptance failed.");
+        return;
+      }
+
+      console.log("Order accepted successfully:", orderSummary);
+      
+      setSelectedOrderSummary(orderSummary);
+
+      handleAcceptOrder();
+
+      // Handle successful order acceptance (e.g., navigate to another screen)
+      // router.push("/Orders");
+      // console.log("Order accepted successfully:", data);
+    } catch (error) {
+      console.error("Error during checkout:", error);
     }
-  
-    if (errorMsg) {
-      return (
-        <View className="flex-1 justify-center items-center">
-          <Text className="text-lg font-medium text-red-500">{errorMsg}</Text>
-        </View>
-      );
-    }
-  
+    // Handle order acceptance logic (e.g., update status in Supabase)
+  };
+
+  if (!location && !errorMsg) {
     return (
-      <GestureHandlerRootView style={styles.container}>
-        <BottomSheetModalProvider>
-          <MapView
-            ref={mapRef}
-            initialRegion={{
+      <View className="flex-1 justify-center items-center">
+        <Text className="text-lg font-medium text-gray-700">
+          Fetching location...
+        </Text>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
+  if (errorMsg) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <Text className="text-lg font-medium text-red-500">{errorMsg}</Text>
+      </View>
+    );
+  }
+
+  return (
+    <GestureHandlerRootView style={styles.container}>
+      <BottomSheetModalProvider>
+        <MapView
+          ref={mapRef}
+          initialRegion={{
+            latitude: location.latitude,
+            longitude: location.longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          }}
+          showsUserLocation={true}
+          followsUserLocation={true}
+          style={styles.map}
+        >
+          <Marker
+            coordinate={{
               latitude: location.latitude,
               longitude: location.longitude,
-              latitudeDelta: 0.01,
-              longitudeDelta: 0.01,
             }}
-            showsUserLocation={true}
-            followsUserLocation={true}
-            style={styles.map}
-          >
-            <Marker
-              coordinate={{
-                latitude: location.latitude,
-                longitude: location.longitude,
-              }}
-              title="Your Location"
-            />
-          </MapView>
-          {/* <Button
+            title="Your Location"
+          />
+        </MapView>
+        {/* <Button
             title="Open First Modal"
             onPress={openFirstModal}
             color="black"
           /> */}
-          {/* Floating Button to Expand Bottom Sheet */}
+        {/* Floating Button to Expand Bottom Sheet */}
+        {(!riderHasOrder || !isOrderAccepted) ? (
           <Pressable
             style={{
               position: "absolute",
@@ -1204,63 +1306,150 @@ import { initializePaymentSheet, openPaymentSheet } from "../lib/stripe";
           >
             <Ionicons name="chevron-up" size={24} color="white" />
           </Pressable>
-  
-          {/* First Modal */}
-          <BottomSheetModal
-            ref={firstModalRef}
-            name="firstModal"
-            stackBehavior="replace"
-            enableDynamicSizing={true}
-            handleComponent={CustomHandle}
-            snapPoints={["25%", "50%", "90%"]} // Opens at 25% initially
-            enableContentPanningGesture={false} // ❌ Prevent modal scrolling inside content
-            enableHandlePanningGesture={true} // ✅ Allow dragging only on the header
-          >
-            <SafeAreaView>
-              <BottomSheetScrollView
-                contentContainerStyle={{ padding: 16 }}
-                keyboardShouldPersistTaps="handled"
-                nestedScrollEnabled={true}
-                scrollEnabled={outerScrollEnabled} // ✅ Controlled by state
-                onLayout={(event) => {
-                  const height = event.nativeEvent.layout.height;
-                  setContentHeight(height);
-                }}
-              >
-                <Ionicons
-                  name="close"
-                  size={28}
-                  className="absolute top-0 right-2 text-gray-700"
-                  onPress={handleClosePress}
-                />
-                <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-                  First Modal 🎉
-                </Text>
-  
-                {/* Destination Input */}
-                <View className="flex-row justify-between items-center mb-4">
-                  <Text className="text-2xl font-semibold text-gray-800">
-                    Enter Destination:
-                  </Text>
-                </View>
-                <BottomSheetTextInput
-                  placeholder="Type destination here..."
-                  value={destination}
-                  onChangeText={setDestination}
-                  className="border border-gray-300 p-4 rounded-lg text-lg bg-gray-100 w-full mb-4"
-                />
-  
-                <Text className="text-8xl text-center">{orders.length}</Text>
-  
-                {/* List of Available Orders Header */}
-                <View className="p-4 rounded-lg bg-gray-800">
-                  <Text className="text-white text-lg font-bold text-center">
-                    List of Available Orders
-                  </Text>
-                </View>
+        ) : null}
 
-                <NativeViewGestureHandler disallowInterruption={true}>
-  
+        {/* Conditional rendering for Cancel and Confirm Arrival buttons */}
+        {(riderHasOrder || isOrderAccepted) && !hasArrived && (
+          <View
+            style={{
+              position: "absolute",
+              bottom: 50,
+              left: 0,
+              right: 0,
+              flexDirection: "row",
+              justifyContent: "space-between",
+              padding: 20,
+            }}
+          >
+            <Pressable
+              style={{
+                backgroundColor: "gray",
+                padding: 10,
+                borderRadius: 20,
+                flex: 1,
+                marginRight: 10,
+              }}
+              onPress={cancelOrder}
+            >
+              <Text style={{ color: "white", textAlign: "center" }}>
+                Cancel
+              </Text>
+            </Pressable>
+            <Pressable
+              style={{
+                backgroundColor: "green",
+                padding: 10,
+                borderRadius: 20,
+                flex: 1,
+              }}
+              onPress={reachDestination}
+            >
+              <Text style={{ color: "white", textAlign: "center" }}>
+                Confirm Arrival
+              </Text>
+            </Pressable>
+          </View>
+        )}
+
+        {/* After arriving at the destination, change button text */}
+        {((riderHasOrder || isOrderAccepted) && hasArrived) && (
+          <View
+            style={{
+              position: "absolute",
+              bottom: 50,
+              left: 0,
+              right: 0,
+              flexDirection: "row",
+              justifyContent: "space-between",
+              padding: 20,
+            }}
+          >
+            {/* <Pressable
+              style={{
+                backgroundColor: "gray",
+                padding: 10,
+                borderRadius: 20,
+                flex: 1,
+                marginRight: 10,
+              }}
+              onPress={cancelOrder}
+            >
+              <Text style={{ color: "white", textAlign: "center" }}>
+                Cancel
+              </Text>
+            </Pressable> */}
+            <Pressable
+              style={{
+                backgroundColor: "blue",
+                padding: 10,
+                borderRadius: 20,
+                flex: 1,
+              }}
+              onPress={orderCompleted}
+              // setHasArrived(null)
+            >
+              <Text style={{ color: "white", textAlign: "center" }}>
+                Order Completed
+              </Text>
+            </Pressable>
+          </View>
+        )}
+
+        {/* First Modal */}
+        <BottomSheetModal
+          ref={firstModalRef}
+          name="firstModal"
+          stackBehavior="replace"
+          enableDynamicSizing={true}
+          handleComponent={CustomHandle}
+          snapPoints={["25%", "50%", "90%"]} // Opens at 25% initially
+          enableContentPanningGesture={false} // ❌ Prevent modal scrolling inside content
+          enableHandlePanningGesture={true} // ✅ Allow dragging only on the header
+        >
+          <SafeAreaView>
+            <BottomSheetScrollView
+              contentContainerStyle={{ padding: 16 }}
+              keyboardShouldPersistTaps="handled"
+              nestedScrollEnabled={true}
+              scrollEnabled={outerScrollEnabled} // ✅ Controlled by state
+              onLayout={(event) => {
+                const height = event.nativeEvent.layout.height;
+                setContentHeight(height);
+              }}
+            >
+              <Ionicons
+                name="close"
+                size={28}
+                className="absolute top-0 right-2 text-gray-700"
+                onPress={handleClosePress}
+              />
+              {/* <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                First Modal 🎉
+              </Text> */}
+
+              {/* Destination Input */}
+              <View className="flex-row justify-between items-center mb-4">
+                <Text className="text-2xl font-semibold text-gray-800">
+                  Enter Destination:
+                </Text>
+              </View>
+              <BottomSheetTextInput
+                placeholder="Type destination here..."
+                value={destination}
+                onChangeText={setDestination}
+                className="border border-gray-300 p-4 rounded-lg text-lg bg-gray-100 w-full mb-4"
+              />
+
+              {/* <Text className="text-8xl text-center">{orders.length}</Text> */}
+
+              {/* List of Available Orders Header */}
+              <View className="p-4 rounded-lg bg-gray-800">
+                <Text className="text-white text-lg font-bold text-center">
+                  List of Available Orders
+                </Text>
+              </View>
+
+              <NativeViewGestureHandler disallowInterruption={true}>
                 {/* Horizontal Scroll for Table */}
                 <BottomSheetScrollView
                   horizontal
@@ -1292,7 +1481,7 @@ import { initializePaymentSheet, openPaymentSheet } from "../lib/stripe";
                         User Email
                       </Text>
                     </View>
-  
+
                     {/* ✅ Scrollable List for Table Data */}
                     <BottomSheetFlatList
                       data={orders}
@@ -1342,67 +1531,65 @@ import { initializePaymentSheet, openPaymentSheet } from "../lib/stripe";
                     />
                   </View>
                 </BottomSheetScrollView>
+              </NativeViewGestureHandler>
+              {/* <Button
+                title="Go to Second Modal"
+                onPress={openSecondModal}
+                color="black"
+              /> */}
+            </BottomSheetScrollView>
+          </SafeAreaView>
+        </BottomSheetModal>
 
-                </NativeViewGestureHandler>
-                <Button
-                  title="Go to Second Modal"
-                  onPress={openSecondModal}
-                  color="black"
-                />
-              </BottomSheetScrollView>
-            </SafeAreaView>
-          </BottomSheetModal>
-  
-          {/* Second Modal with Back Arrow */}
-          <BottomSheetModal
-            ref={secondModalRef}
-            name="secondModal"
-            stackBehavior="replace"
-            snapPoints={["85%"]} // Opens at 25% initially
-            handleComponent={CustomHandle}
-            enableContentPanningGesture={true} // ❌ Prevent modal scrolling inside content
-            enableHandlePanningGesture={true} // ✅ Allow dragging only on the header
-          >
-            {/* <SafeAreaView> */}
-              <SecondModal
-                orderData={selectedOrder}
-                goBackToFirstModal={openFirstModal}
-                acceptOrder={acceptOrder}
-              />
-          </BottomSheetModal>
-        </BottomSheetModalProvider>
-      </GestureHandlerRootView>
-    );
-  };
-  
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      // padding: 24,
-      justifyContent: "center",
-      // backgroundColor: "grey",
-    },
-    contentContainer: {
-      padding: 20,
-      alignItems: "center",
-    },
-    text: {
-      fontSize: 18,
-      fontWeight: "bold",
-      marginBottom: 10,
-    },
-    backButton: {
-      position: "absolute",
-      top: 10,
-      left: 15,
-      padding: 10,
-    },
-  
-    map: {
-      width: Dimensions.get("window").width,
-      height: Dimensions.get("window").height,
-    },
-  });
-  
-  export default App;
-  
+        {/* Second Modal with Back Arrow */}
+        <BottomSheetModal
+          ref={secondModalRef}
+          name="secondModal"
+          stackBehavior="replace"
+          snapPoints={["85%"]} // Opens at 25% initially
+          handleComponent={CustomHandle}
+          enableContentPanningGesture={true} // ❌ Prevent modal scrolling inside content
+          enableHandlePanningGesture={true} // ✅ Allow dragging only on the header
+        >
+          {/* <SafeAreaView> */}
+          <SecondModal
+            orderData={selectedOrder}
+            goBackToFirstModal={openFirstModal}
+            acceptOrder={acceptOrder}
+          />
+        </BottomSheetModal>
+      </BottomSheetModalProvider>
+    </GestureHandlerRootView>
+  );
+};
+
+export default App;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    // padding: 24,
+    justifyContent: "center",
+    // backgroundColor: "grey",
+  },
+  contentContainer: {
+    padding: 20,
+    alignItems: "center",
+  },
+  text: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  backButton: {
+    position: "absolute",
+    top: 10,
+    left: 15,
+    padding: 10,
+  },
+
+  map: {
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height,
+  },
+});

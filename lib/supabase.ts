@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as SecureStore from 'expo-secure-store'
 import * as aesjs from 'aes-js'
 import 'react-native-get-random-values'
+import Constants from "expo-constants";
 
 // As Expo's SecureStore does not support values larger than 2048
 // bytes, an AES-256 key is generated and stored in SecureStore, while
@@ -56,9 +57,11 @@ class LargeSecureStore {
   }
 }
 
-const supabaseUrl = 'https://sbdzcpcznysxcmjaumoa.supabase.co';
+// const supabaseUrl = 'https://sbdzcpcznysxcmjaumoa.supabase.co';
+const supabaseUrl = Constants.expoConfig.extra.supabaseUrl;
 // process.env.EXPO_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNiZHpjcGN6bnlzeGNtamF1bW9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI2ODUxODgsImV4cCI6MjA0ODI2MTE4OH0.ifLVHlBcrw_0ly2djAYJG4Hxq0ZmTbhNgHWXwKcHsp0';
+// const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNiZHpjcGN6bnlzeGNtamF1bW9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI2ODUxODgsImV4cCI6MjA0ODI2MTE4OH0.ifLVHlBcrw_0ly2djAYJG4Hxq0ZmTbhNgHWXwKcHsp0';
+const supabaseAnonKey = Constants.expoConfig.extra.supabaseAnonKey;
 // process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
 
 console.log("supabaseUrl", process.env.SUPABASE_URL, "supabase anon", process.env.SUPABASE_ANON_KEY);

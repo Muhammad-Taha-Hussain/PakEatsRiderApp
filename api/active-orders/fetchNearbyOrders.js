@@ -9,20 +9,20 @@ import { supabase } from "../../lib/supabase";
 export async function fetchNearbyOrders(riderLat, riderLng) {
   try {
     // Set the radius in kilometers
-    const radiusInKm = 10;
-    const earthRadiusKm = 6371;
+    // const radiusInKm = 10;
+    // const earthRadiusKm = 6371;
 
     // Convert degrees to radians
-    const latInDegrees = riderLat * (180 / Math.PI);
-    const lngInDegrees = riderLng * (180 / Math.PI);
-    console.log("Rider's current location", { latInDegrees, lngInDegrees });
+    // const latInDegrees = riderLat * (180 / Math.PI);
+    // const lngInDegrees = riderLng * (180 / Math.PI);
+    // console.log("Rider's current location", { latInDegrees, lngInDegrees });
 
     const roundedLat = parseFloat(riderLat.toFixed(6));
     const roundedLng = parseFloat(riderLng.toFixed(6));
 
     const { data: orders, error } = await supabase.rpc("fetch_nearby_orders", {
-      rider_lat: 31.4330211,
-      rider_lng: 74.3035832,
+      rider_lat: riderLat,
+      rider_lng: riderLng,
       radius_km: 5,
     });
 

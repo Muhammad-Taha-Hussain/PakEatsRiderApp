@@ -57,7 +57,19 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         const currentUser = session?.user || null;
         setUser(currentUser);
 
+        console.log("Current User:", currentUser?.id);
+
         if (currentUser) {
+          const { data, error: errorData } = await supabase
+            .from("riders")
+            .select("*")
+            .eq("riderid", currentUser?.id);
+          console.log("data", data);
+          if (errorData) throw errorData;
+
+          setProfile(data[0]);
+          console.log("Profile Data:", data[0]);
+
         } else {
           setProfile(null); // Ensure profile is null when no session exists
         }
@@ -297,7 +309,10 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         password,
       });
 
-      const { data, error: errorData } = await supabase.from("riders").select("*").eq("riderid", authData?.user?.id);
+      const { data, error: errorData } = await supabase
+        .from("riders")
+        .select("*")
+        .eq("riderid", authData?.user?.id);
       console.log("data", data);
       if (error) throw error;
       if (errorData) throw errorData;
@@ -305,10 +320,9 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       // if (currentUser) {
       //   await ensureUserInCustomersTable(currentUser, userName);
       // }
-      
+
       setProfile(data[0]);
       console.log("profile", profile);
-      
     } catch (error) {
       console.error("Login Error:", error.message);
       throw error;
@@ -318,8 +332,8 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   // Logout Function
   const logout = async () => {
     await supabase.auth.signOut();
-    console.log('profile', profile);
-    
+    console.log("profile", profile);
+
     setUser(null);
     setProfile(null);
   };

@@ -7,12 +7,73 @@ import {supabase} from "../lib/supabase";
 export default function useCurrentLocation() {
   const [orders, setOrders] = useState([]);
   const [riderHasOrder, setRiderHasOrder] = useState(false);
+  const [riderOrder, setRiderOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const mapRef = useRef(null);
   let locationSubscription = useRef(null);
 
+
+  const fetchAcceptedOrders = useCallback(async () => {
+    // if (riderHasOrder) return; // Stop fetching if rider has an order
+
+    // Check if rider has an order
+    const { data, error } = await supabase
+      .from("riderpaymentsummary")
+      .select("riderpaymentid, orderid, riderid, isActive")
+      .eq("riderid", "4fc0bd68-4a74-446c-897e-3580525fb35f") // Replace with dynamic rider ID
+      .eq("isActive", true);
+
+      console.log("orderdata", data);
+
+    if (!error && data.length > 0) {
+      setRiderOrder(data[0]);
+      setRiderHasOrder(true);
+      return;
+    } else {
+      setRiderHasOrder(false);
+      return;
+    }
+    console.log("Rider has order:", riderHasOrder);
+
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      setErrorMsg("Permission denied");
+      setLoading(false);
+      return;
+    }
+     // Get current location
+     const currentLocation = await Location.getCurrentPositionAsync({});
+     if (!currentLocation || !currentLocation.coords) return;
+     setLocation(currentLocation.coords);
+ 
+     const riderLat = currentLocation.coords.latitude;
+     const riderLng = currentLocation.coords.longitude;
+     console.log("Rider's current location:", currentLocation);
+ 
+     // Fetch nearby orders
+     try {
+       const nearbyOrders = await fetchNearbyOrders(riderLat, riderLng);
+       console.log("Nearby Orders:", nearbyOrders);
+       setOrders(nearbyOrders);
+     } catch (error) {
+       console.error("Error fetching nearby orders:", error);
+     }
+ 
+     // Animate map to user's location
+     if (mapRef.current) {
+       mapRef.current.animateToRegion(
+         {
+           latitude: riderLat,
+           longitude: riderLng,
+           latitudeDelta: 0.01, // Zoom level
+           longitudeDelta: 0.01,
+         },
+         1000
+       );
+     }
+   }, [riderHasOrder]);
 
   const fetchOrders = useCallback(async () => {
     if (riderHasOrder) return; // Stop fetching if rider has an order
@@ -55,19 +116,19 @@ export default function useCurrentLocation() {
      }
    }, [riderHasOrder]);
  
-   const checkRiderStatus = useCallback(async () => {
-     const { data, error } = await supabase
-       .from("riderpaymentsummary")
-       .select("Status")
-       .eq("RiderId", "YOUR_RIDER_ID_HERE") // Replace with dynamic rider ID
-       .in("Status", ["Accepted", "Delivering"]);
+  //  const checkRiderStatus = useCallback(async () => {
+  //    const { data, error } = await supabase
+  //      .from("riderpaymentsummary")
+  //      .select("Status")
+  //      .eq("RiderId", "YOUR_RIDER_ID_HERE") // Replace with dynamic rider ID
+  //      .in("Status", ["Accepted", "Delivering"]);
  
-     if (!error && data.length > 0) {
-       setRiderHasOrder(true);
-     } else {
-       setRiderHasOrder(false);
-     }
-   }, []);
+  //    if (!error && data.length > 0) {
+  //      setRiderHasOrder(true);
+  //    } else {
+  //      setRiderHasOrder(false);
+  //    }
+  //  }, []);
  
    useEffect(() => {
      const startTracking = async () => {
@@ -92,16 +153,18 @@ export default function useCurrentLocation() {
        );
      };
  
+     fetchAcceptedOrders();
      startTracking();
      fetchOrders();
-     checkRiderStatus();
+    //  checkRiderStatus();
  
      return () => {
        if (locationSubscription.current) {
          locationSubscription.current.remove();
        }
+      //  , checkRiderStatus
      };
-   }, [fetchOrders, checkRiderStatus]);
+   }, [fetchOrders]);
  
    useEffect(() => {
      if (!riderHasOrder) {
@@ -110,7 +173,7 @@ export default function useCurrentLocation() {
      }
    }, [riderHasOrder, fetchOrders]);
  
-   return { location, errorMsg, mapRef, orders, loading };
+   return { location, errorMsg, riderHasOrder, riderOrder, mapRef, orders, loading };
  }
 
   // useEffect(() => {
