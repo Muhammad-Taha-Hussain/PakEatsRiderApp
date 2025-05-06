@@ -12,9 +12,7 @@
       "distribution": "internal"
     },
     "production": {
-      "distribution": "store",
-      "node": "18.x",
-      "packageManager": "npm --legacy-peer-deps"
+      "autoIncrement": true
     }
   },
   "submit": {
